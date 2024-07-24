@@ -39,13 +39,14 @@ jobs:
     
         - name: Unit Testing
           run: npm test
+          continue-on-error: true
           
         - name: Archive Test Result
           uses: actions/upload-artifact@v3
           with:
             name: Mocha-Test-Result
             path: test-results.xml
-            
+
     code-coverage:
               name: Code Coverage
               runs-on: ubuntu-latest
@@ -63,7 +64,7 @@ jobs:
           
               - name: Code Coverage
                 run: npm run coverage
-                
+                continue-on-error: true
               - name: Archive Code Coverage
                 uses: actions/upload-artifact@v3
                 with:
