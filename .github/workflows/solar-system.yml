@@ -8,8 +8,10 @@ on:
       - 'feature/*'
 
 env:
-  MONGO_URI: 'mongodb+srv://cluster0.a3vqldy.mongodb.net/SuperData/?retryWrites=true&w=majority&appName=Cluster0'
-  MONGO_USERNAME: ${{ vars.MONGO_USERNAME }}
+  MONGO_URI: ${{ secrets.MONGO_URI }}
+  MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
+  MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
+  MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
   MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
 
 jobs:
