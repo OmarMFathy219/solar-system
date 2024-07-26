@@ -109,11 +109,11 @@ jobs:
         - name: Test Docker Image
           run: |
                docker run --name solar-system -d \
-               -p 3000:3000 \
-               -e MONGO_URI=${{ secrets.MONGO_URI }} \
-               -e MONGO_USERNAME=${{ secrets.MONGO_USERNAME }} \
-               -e MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }} \
-               ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
+                  -p 3000:3000 \
+                  -e MONGO_URI=${{ secrets.MONGO_URI }} \
+                  -e MONGO_USERNAME=${{ secrets.MONGO_USERNAME }} \
+                  -e MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }} \
+                  ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
 
                wget -q -o 127.0.0.1:3000/live | grep live
                
