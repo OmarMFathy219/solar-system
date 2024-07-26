@@ -115,6 +115,6 @@ jobs:
                   -e MONGO_PASSWORD=$MONGO_PASSWORD \
                   ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
 
-               wget -q -o 127.0.0.1:3000/live | grep live
+               wget -q -O - 127.0.0.1:3000/live | grep live
                
                echo "Docker Image Test Passed"
