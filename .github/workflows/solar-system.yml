@@ -116,5 +116,11 @@ jobs:
                   ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
 
                wget -q -O - 127.0.0.1:3000/live | grep live
-               
                echo "Docker Image Test Passed"
+
+        - name: Push Docker Image
+          uses: docker/build-push-action@v4
+          with:
+            context: .
+            push: true
+            tags: ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
