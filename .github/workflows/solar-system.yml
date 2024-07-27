@@ -175,5 +175,5 @@ jobs:
       
       - name: Fetch kubectl version
         run: | 
-          kubectl version --short
+          kubectl version
           kubectl get nodes
