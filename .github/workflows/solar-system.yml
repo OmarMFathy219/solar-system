@@ -56,15 +56,23 @@ jobs:
 
     code-coverage:
               name: Code Coverage
+              container:
+                image: node:18
+              services:
+                mongo:
+                  image: mongo:latest
+                  options: 
+                    --name mongo
+                  env:
+                    MONGO_URI: mongodb://mongo:27017
+                    MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
+                    MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
+                    MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_USERNAME }}
+                    MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
               runs-on: ubuntu-latest
               steps:
               - name: Checkout Repository
                 uses: actions/checkout@v4
-      
-              - name: Setup NodeJS Version 18
-                uses: actions/setup-node@v3
-                with:
-                  node-version: 18
               
               - name: Cache Node Modules
                 uses: actions/cache@v3
