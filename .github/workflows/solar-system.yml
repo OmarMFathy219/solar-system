@@ -55,47 +55,47 @@ jobs:
             path: test-results.xml
 
     code-coverage:
-              name: Code Coverage
-              container:
-                image: node:18
-              services:
-                mongo:
-                  image: mongo:latest
-                  options: 
-                    --name mongo
-                  env:
-                    MONGO_URI: mongodb://mongo:27017
-                    MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
-                    MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
-                    MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_USERNAME }}
-                    MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
-              runs-on: ubuntu-latest
-              steps:
-              - name: Checkout Repository
-                uses: actions/checkout@v4
-              
-              - name: Cache Node Modules
-                uses: actions/cache@v3
-                with:
-                  path: node_modules
-                  key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          
-              - name: Install Dependencies
-                run: npm install
-          
-              - name: Code Coverage
-                run: npm run coverage
-                continue-on-error: true
-          
-              - name: Archive Code Coverage
-                uses: actions/upload-artifact@v3
-                with:
-                  name: Code-Coverage
-                  path: coverage
-                  retention-days: 3
+        name: Code Coverage
+        container:
+          image: node:18
+        services:
+          mongo:
+            image: mongo:latest
+            options: 
+              --name mongo
+            env:
+              MONGO_URI: mongodb://mongo:27017
+              MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
+              MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
+              MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_USERNAME }}
+              MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+        runs-on: ubuntu-latest
+        steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v4
+        
+        - name: Cache Node Modules
+          uses: actions/cache@v3
+          with:
+            path: node_modules
+            key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+    
+        - name: Install Dependencies
+          run: npm install
+    
+        - name: Code Coverage
+          run: npm run coverage
+          continue-on-error: true
+    
+        - name: Archive Code Coverage
+          uses: actions/upload-artifact@v3
+          with:
+            name: Code-Coverage
+            path: coverage
+            retention-days: 3
       
     Build-Image:
-        name: Build Docker Image
+        name: Build Docker Image and Push to Docker Hub & GitHub Container Registry
         permissions:
           packages: write
         needs: [unit-testing, code-coverage]
@@ -145,3 +145,19 @@ jobs:
             tags: | 
               ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
               ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}
+    
+    deploy-stg-eks:
+      name: Deploy to EKS Staging Environment
+      needs: [Build-Image]
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: '1.30.0'
+      
+      - name: Fetch Kubectl version
+        run: kubectl version
