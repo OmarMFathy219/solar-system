@@ -159,21 +159,12 @@ jobs:
         uses: azure/setup-kubectl@v4.0.0
         with:
           version: 'v1.30.0'
-          
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+
+      - name: Set Kubecfg
+        uses: azure/k8s-set-context@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
-
-      - name: Set Kubeconfig
-        run: |
-          aws eks --region ${{ env.AWS_DEFAULT_REGION }} update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
-          cat /home/runner/.kube/config  # Debugging purpose
-
-      - name: Fetch Kubectl version
-        run: kubectl version --client
-
-      - name: Fetch EKS Cluster Info
-        run: kubectl get nodes
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+      
+      - name: Fetch kubectl version
+        run: kubectl version
