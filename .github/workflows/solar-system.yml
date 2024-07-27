@@ -72,7 +72,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
         - name: Checkout Repository
-          uses: actions/checkout@4.1.7
+          uses: actions/checkout@v4.1.7
         
         - name: Cache Node Modules
           uses: actions/cache@v4.0.2
@@ -161,3 +161,6 @@ jobs:
       
       - name: Fetch Kubectl version
         run: kubectl version
+          
+      - name: Set Kubeconfig Context
+        run: aws 
