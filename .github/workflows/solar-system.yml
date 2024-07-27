@@ -7,16 +7,29 @@ on:
       - main
       - 'feature/*'
 
-env:
-  MONGO_URI: ${{ secrets.MONGO_URI }}
-  MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
-  MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
-  MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
-  MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+# env:
+#   MONGO_URI: ${{ secrets.MONGO_URI }}
+#   MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
+#   MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
+#   MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
+#   MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
 
 jobs:
     unit-testing:
         name: Unit Testing
+        services:
+          mongo:
+            image: mongo:latest
+            env:
+              MONGO_URI: ${{ secrets.MONGO_URI }}
+              MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
+              MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
+              MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
+              MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+              MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_USERNAME }}
+              MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+            ports:
+              - 27017:27017
         strategy:
             matrix:
                 operating-system: [ubuntu-latest, macos-latest]
