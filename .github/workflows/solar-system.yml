@@ -6,6 +6,8 @@ on:
     branches:
       - main
       - 'feature/*'
+env:
+  AWS_DEFAULT_REGION: us-east-1
 
 jobs:
     unit-testing:
@@ -164,10 +166,13 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: 'us-east-1'
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
       - name: Set Kubeconfig
-        run: aws eks --region us-east-1 update-kubeconfig --name GitHub-Actions
+        run: aws eks --region ${{ env.AWS_DEFAULT_REGION }} update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
 
       - name: Fetch Kubectl version
-        run: kubectl version
+        run: kubectl version --client
+
+      - name: Fetch EKS Cluster Info
+        run: kubectl get nodes
