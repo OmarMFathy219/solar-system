@@ -10,149 +10,148 @@ env:
   AWS_DEFAULT_REGION: us-east-1
 
 jobs:
-    unit-testing:
-        name: Unit Testing
-        services:
-          mongo:
-            image: mongo:latest
-            env:
-              MONGO_URI: mongodb://localhost:27017
-              MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
-              MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
-              MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_USERNAME }}
-              MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
-            ports:
-              - 27017:27017
-        strategy:
-            matrix:
-                operating-system: [ubuntu-latest]
-                node-version: [18, 20]  
-        runs-on: ${{ matrix.operating-system }}
-        steps:
-        - name: Checkout Repository
-          uses: actions/checkout@v4.1.7
+  unit-testing:
+    name: Unit Testing
+    services:
+      mongo:
+        image: mongo:latest
+        env:
+          MONGO_URI: mongodb://localhost:27017
+          MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
+          MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
+          MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_USERNAME }}
+          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+        ports:
+          - 27017:27017
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest]
+        node-version: [18, 20]  
+    runs-on: ${{ matrix.operating-system }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.1.7
 
-        - name: Setup NodeJS Version ${{ matrix.node-version }}
-          uses: actions/setup-node@v4.0.3
-          with:
-            node-version: ${{ matrix.node-version }}
+      - name: Setup NodeJS Version ${{ matrix.node-version }}
+        uses: actions/setup-node@v4.0.3
+        with:
+          node-version: ${{ matrix.node-version }}
 
-        - name: Cache Node Modules
-          uses: actions/cache@v4.0.2
-          with:
-            path: node_modules
-            key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      - name: Cache Node Modules
+        uses: actions/cache@v4.0.2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
     
-        - name: Install Dependencies
-          run: npm install
+      - name: Install Dependencies
+        run: npm install
     
-        - name: Unit Testing
-          run: npm test
-          continue-on-error: true
+      - name: Unit Testing
+        run: npm test
+        continue-on-error: true
           
-        - name: Archive Test Result
-          uses: actions/upload-artifact@v3
-          with:
-            name: Mocha-Test-Result
-            path: test-results.xml
+      - name: Archive Test Result
+        uses: actions/upload-artifact@v3
+        with:
+          name: Mocha-Test-Result
+          path: test-results.xml
 
-    code-coverage:
-        name: Code Coverage
-        container:
-          image: node:18
-        services:
-          mongo:
-            image: mongo:latest
-            options: 
-              --name mongo
-            env:
-              MONGO_URI: mongodb://mongo:27017
-              MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
-              MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
-              MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_USERNAME }}
-              MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout Repository
-          uses: actions/checkout@v4.1.7
+  code-coverage:
+    name: Code Coverage
+    container:
+      image: node:18
+    services:
+      mongo:
+        image: mongo:latest
+        options: 
+          --name mongo
+        env:
+          MONGO_URI: mongodb://mongo:27017
+          MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
+          MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
+          MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_USERNAME }}
+          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.1.7
         
-        - name: Cache Node Modules
-          uses: actions/cache@v4.0.2
-          with:
-            path: node_modules
-            key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      - name: Cache Node Modules
+        uses: actions/cache@v4.0.2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
     
-        - name: Install Dependencies
-          run: npm install
+      - name: Install Dependencies
+        run: npm install
     
-        - name: Code Coverage
-          run: npm run coverage
-          continue-on-error: true
+      - name: Code Coverage
+        run: npm run coverage
+        continue-on-error: true
     
-        - name: Archive Code Coverage
-          uses: actions/upload-artifact@v4
-          with:
-            name: Code-Coverage
-            path: coverage
-            retention-days: 3
+      - name: Archive Code Coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: Code-Coverage
+          path: coverage
+          retention-days: 3
       
-    Build-Image:
-        name: Build Docker Image and Push to Docker Hub & GitHub Container Registry
-        permissions:
-          packages: write
-        needs: [unit-testing, code-coverage]
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout Repository
-          uses: actions/checkout@v4.1.7
+  Build-Image:
+    name: Build Docker Image and Push to Docker Hub & GitHub Container Registry
+    permissions:
+      packages: write
+    needs: [unit-testing, code-coverage]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.1.7
 
-        - name: DockerHub Login
-          uses: docker/login-action@v3.3.0
-          with:
-            username: ${{ secrets.DOCKER_USERNAME }}
-            password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: DockerHub Login
+        uses: docker/login-action@v3.3.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
         
-        - name: GitHub Container Registry Login
-          uses: docker/login-action@v3.3.0
-          with:
-            registry: ghcr.io
-            username: ${{ github.repository_owner }}
-            password: ${{ secrets.GITHUB_TOKEN }}
+      - name: GitHub Container Registry Login
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-
-        - name: Build Docker Image
-          uses: docker/build-push-action@v6.5.0
-          with:
-            context: .
-            push: false
-            tags: ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
+      - name: Build Docker Image
+        uses: docker/build-push-action@v6.5.0
+        with:
+          context: .
+          push: false
+          tags: ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
         
-        - name: Test Docker Image
-          run: |
-               docker run --name solar-system -d \
-                  -p 3000:3000 \
-                  -e MONGO_URI=$MONGO_URI \
-                  -e MONGO_USERNAME=$MONGO_USERNAME \
-                  -e MONGO_PASSWORD=$MONGO_PASSWORD \
-                  ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
+      - name: Test Docker Image
+        run: |
+          docker run --name solar-system -d \
+            -p 3000:3000 \
+            -e MONGO_URI=$MONGO_URI \
+            -e MONGO_USERNAME=$MONGO_USERNAME \
+            -e MONGO_PASSWORD=$MONGO_PASSWORD \
+            ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
 
-               wget -q -O - 127.0.0.1:3000/live | grep live
-               echo "Docker Image Test Passed"
+          wget -q -O - 127.0.0.1:3000/live | grep live
+          echo "Docker Image Test Passed"
 
-        - name: Push Docker Image to DockerHub and GitHub Container Registry
-          uses: docker/build-push-action@v6.5.0
-          with:
-            context: .
-            push: true
-            tags: | 
-              ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
-              ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}
+      - name: Push Docker Image to DockerHub and GitHub Container Registry
+        uses: docker/build-push-action@v6.5.0
+        with:
+          context: .
+          push: true
+          tags: | 
+            ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}
     
-    deploy-stg-eks:
-      name: Deploy to EKS Staging Environment
-      needs: [Build-Image]
-      runs-on: ubuntu-latest
-      steps:
+  deploy-stg-eks:
+    name: Deploy to EKS Staging Environment
+    needs: [Build-Image]
+    runs-on: ubuntu-latest
+    steps:
       - name: Checkout Repository
         uses: actions/checkout@v4.1.7
 
@@ -169,7 +168,9 @@ jobs:
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
       - name: Set Kubeconfig
-        run: aws eks --region ${{ env.AWS_DEFAULT_REGION }} update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
+        run: |
+          aws eks --region ${{ env.AWS_DEFAULT_REGION }} update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
+          cat /home/runner/.kube/config  # Debugging purpose
 
       - name: Fetch Kubectl version
         run: kubectl version --client
