@@ -168,7 +168,7 @@ jobs:
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
       - name: Set Kubecfg File
-        uses: azure/k8s-set-context@v3
+        uses: azure/k8s-set-context@v4
         with:
           method: kubeconfig
           kubeconfig: ${{ secrets.KUBE_CONFIG }}
@@ -176,4 +176,3 @@ jobs:
       - name: Fetch kubectl version
         run: | 
           kubectl version
-          kubectl get nodes
