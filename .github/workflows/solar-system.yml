@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - 'feature/*'
+
 env:
   AWS_DEFAULT_REGION: us-east-1
   ENV_MONGO_URI: mongodb://localhost:27017
@@ -17,9 +18,6 @@ jobs:
       mongo:
         image: mongo:latest
         env:
-          MONGO_URI: mongodb://localhost:27017
-          MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
-          MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
           MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_USERNAME }}
           MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
         ports:
@@ -64,12 +62,7 @@ jobs:
     services:
       mongo:
         image: mongo:latest
-        options: 
-          --name mongo
         env:
-          MONGO_URI: mongodb://localhost:27017
-          MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
-          MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
           MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_USERNAME }}
           MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
     runs-on: ubuntu-latest
@@ -131,13 +124,12 @@ jobs:
         run: |
           docker run --name solar-system -d \
             -p 3000:3000 \
-            -e MONGO_URI= ${{env.ENV_MONGO_URI }} \
-            -e MONGO_USERNAME= ${{ secrets.MONGO_USERNAME }} \
-            -e MONGO_PASSWORD= ${{ secrets.MONGO_PASSWORD }} \
+            -e MONGO_URI=${{ env.ENV_MONGO_URI }} \
+            -e MONGO_USERNAME=${{ secrets.MONGO_USERNAME }} \
+            -e MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }} \
             ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
 
-          wget -q -O - 127.0.0.1:3000/live | grep live
-          echo "Docker Image Test Passed"
+          wget -q -O - 127.0.0.1:3000/live | grep live && echo "Docker Image Test Passed"
 
       - name: Push Docker Image to DockerHub and GitHub Container Registry
         uses: docker/build-push-action@v6.5.0
@@ -182,8 +174,7 @@ jobs:
 
       - name: Save Ingress IP as a GitHub Environment Variable
         run: |
-          echo "INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-          " >> $GITHUB_ENV
+          echo "INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" >> $GITHUB_ENV
 
       - name: Replace Token in Manifest Files
         uses: cschleiden/replace-tokens@v1.3
@@ -200,9 +191,9 @@ jobs:
       - name: Create MongoDB Secret
         run: |
           kubectl -n ${{ vars.NAMESPACE}} create secret generic mongo-db-creds \
-            --from-literal=MONGO_URI= ${{ env.ENV_MONGO_URI }} \
-            --from-literal=MONGO_USERNAME= ${{ secrets.MONGO_USERNAME }} \
-            --from-literal=MONGO_PASSWORD=  ${{ secrets.MONGO_PASSWORD }}
+            --from-literal=MONGO_URI=${{ env.ENV_MONGO_URI }} \
+            --from-literal=MONGO_USERNAME=${{ secrets.MONGO_USERNAME }} \
+            --from-literal=MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }} \
             --save-config --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy to Dev Environment
@@ -212,7 +203,7 @@ jobs:
       - name: Get Ingress URL
         id: get-ingress-url
         run: |
-          echo "APP_INGRESS_HOST=$(kubectl get ingress -n ${{ vars.NAMESPACE }} -o jsonpath='{.items[0].spec.tls[0].hosts[0]}')"
+          echo "APP_INGRESS_HOST=$(kubectl get ingress -n ${{ vars.NAMESPACE }} -o jsonpath='{.items[0].spec.tls[0].hosts[0]}')" >> $GITHUB_ENV
 
   Integration-Testing:
     name: Integration Testing
