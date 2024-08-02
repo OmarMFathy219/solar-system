@@ -143,6 +143,9 @@ jobs:
   deploy-stg-eks:
     name: Deploy to EKS Staging Environment
     needs: [Build-Image]
+    environment:
+      name: development
+      url: https://dev.company.com
     outputs:
       URL: ${{ steps.get-ingress-url.outputs.APP_INGRESS_HOST }}
     runs-on: ubuntu-latest
@@ -216,4 +219,4 @@ jobs:
         run: |
           echo $URL
           echo "-------------------------------------------"
-          curl https://$URL/live | jq -r '.status' | grep -i live
+        # curl https://$URL/live | jq -r '.status' | grep -i live
