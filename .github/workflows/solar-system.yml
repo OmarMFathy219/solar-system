@@ -9,10 +9,6 @@ on:
 env:
   AWS_DEFAULT_REGION: us-east-1
   ENV_MONGO_URI: mongodb://localhost:27017
-  ENV_MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
-  ENV_MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
-  ENV_MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_USERNAME }}
-  ENV_MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
 
 jobs:
   unit-testing:
@@ -21,11 +17,11 @@ jobs:
       mongo:
         image: mongo:latest
         env:
-          MONGO_URI: $ENV_MONGO_URI
-          MONGO_CLUSTER: $ENV_MONGO_CLUSTER
-          MONGO_DB_NAME: $ENV_MONGO_DB_NAME
-          MONGO_INITDB_ROOT_USERNAME: $ENV_MONGO_INITDB_ROOT_USERNAME
-          MONGO_INITDB_ROOT_PASSWORD: $ENV_MONGO_INITDB_ROOT_PASSWORD
+          MONGO_URI: mongodb://localhost:27017
+          MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
+          MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
+          MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_USERNAME }}
+          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
         ports:
           - 27017:27017
     strategy:
@@ -71,11 +67,11 @@ jobs:
         options: 
           --name mongo
         env:
-          MONGO_URI: ENV_MONGO_URI
-          MONGO_CLUSTER: $ENV_MONGO_CLUSTER
-          MONGO_DB_NAME: $ENV_MONGO_DB_NAME
-          MONGO_INITDB_ROOT_USERNAME: $ENV_MONGO_INITDB_ROOT_USERNAME
-          MONGO_INITDB_ROOT_PASSWORD: $ENV_MONGO_INITDB_ROOT_PASSWORD
+          MONGO_URI: mongodb://localhost:27017
+          MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
+          MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
+          MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_USERNAME }}
+          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -135,9 +131,9 @@ jobs:
         run: |
           docker run --name solar-system -d \
             -p 3000:3000 \
-            -e MONGO_URI=$MONGO_URI \
-            -e MONGO_USERNAME=$MONGO_USERNAME \
-            -e MONGO_PASSWORD=$MONGO_PASSWORD \
+            -e MONGO_URI= ${{env.ENV_MONGO_URI }} \
+            -e MONGO_USERNAME= ${{ secrets.MONGO_USERNAME }} \
+            -e MONGO_PASSWORD= ${{ secrets.MONGO_PASSWORD }} \
             ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
 
           wget -q -O - 127.0.0.1:3000/live | grep live
@@ -205,8 +201,8 @@ jobs:
         run: |
           kubectl -n ${{ vars.NAMESPACE}} create secret generic mongo-db-creds \
             --from-literal=MONGO_URI= ${{ env.ENV_MONGO_URI }} \
-            --from-literal=MONGO_USERNAME= ${{ env.ENV_MONGO_INITDB_ROOT_USERNAME }} \
-            --from-literal=MONGO_PASSWORD=  ${{ env.ENV_MONGO_INITDB_ROOT_PASSWORD }}
+            --from-literal=MONGO_USERNAME= ${{ secrets.MONGO_USERNAME }} \
+            --from-literal=MONGO_PASSWORD=  ${{ secrets.MONGO_PASSWORD }}
             --save-config --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy to Dev Environment
