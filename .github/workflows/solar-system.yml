@@ -204,3 +204,21 @@ jobs:
       - name: Deploy to Dev Environment
         run: |
           kubectl apply -f kubernetes/development
+
+  #     - name: Get Ingress URL
+  #       run: |
+  #         URL=$(kubectl get svc solar-system -n ${{ vars.NAMESPACE }} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+  #         echo "Service URL: $URL"
+  #       env:
+  #         NAMESPACE: ${{ vars.NAMESPACE }}
+
+  # Integration-Testing:
+  #   name: Integration Testing
+  #   needs: [deploy-stg-eks]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Test URL Output Using Curl and jq
+  #       run: |
+  #         echo $URL
+  #         echo "-------------------------------------------"
+  #         curl https://$URL/live | jq -r '.status' | grep -i live
