@@ -176,3 +176,20 @@ jobs:
       - name: Fetch kubectl version
         run: | 
           kubectl version
+
+      - name: Replace Token in Managed Files
+        uses: cschleiden/replace-tokens@v1.3
+        with:
+          tokenPrefix: '__{__'
+          tokenSuffix: '__}__'
+          files: '["kubernetes/development/*.yaml"]'
+        env:
+          NAMESPACE: ${{ var.NAMESPACE }}
+          REPLICAS: ${{ var.REPLICAS }}
+          IMAGE: ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
+      
+      - name: Check the files
+        run: |
+          cat kubernetes/development/*.yaml
+
+            

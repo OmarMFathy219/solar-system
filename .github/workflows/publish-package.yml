@@ -6,7 +6,7 @@ on:
 
 jobs:
   Test-Published-Package:
-    name: Test Published Package
+    name:  Publish Package to Npm Registry
     runs-on: ubuntu-latest
     permissions:
       packages: write
