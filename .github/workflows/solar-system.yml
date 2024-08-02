@@ -155,6 +155,8 @@ jobs:
   deploy-stg-eks:
     name: Deploy to EKS Staging Environment
     needs: [Build-Image]
+    outputs:
+      URL: ${{ steps.get-ingress-url.outputs.APP_INGRESS_HOST }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -182,6 +184,11 @@ jobs:
         run: | 
           kubectl version
 
+      - name: Save Ingress IP as a GitHub Environment Variable
+        run: |
+          echo "INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          " >> $GITHUB_ENV
+
       - name: Replace Token in Manifest Files
         uses: cschleiden/replace-tokens@v1.3
         with:
@@ -192,33 +199,34 @@ jobs:
           NAMESPACE: ${{ vars.NAMESPACE }}
           REPLICAS: ${{ vars.REPLICAS }}
           IMAGE: ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
+          INGRESS_IP: ${{ env.INGRESS_IP }}
      
       - name: Create MongoDB Secret
         run: |
           kubectl -n ${{ vars.NAMESPACE}} create secret generic mongo-db-creds \
-            --from-literal=MONGO_URI= $MONGO_URI \
-            --from-literal=MONGO_USERNAME= $MONGO_USERNAME \
-            --from-literal=MONGO_PASSWORD= $MONGO_PASSWORD \
+            --from-literal=MONGO_URI= MONGO_URI \
+            --from-literal=MONGO_USERNAME= MONGO_USERNAME \
+            --from-literal=MONGO_PASSWORD=  MONGO_PASSWORD \
             --save-config --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy to Dev Environment
         run: |
           kubectl apply -f kubernetes/development
 
-  #     - name: Get Ingress URL
-  #       run: |
-  #         URL=$(kubectl get svc solar-system -n ${{ vars.NAMESPACE }} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-  #         echo "Service URL: $URL"
-  #       env:
-  #         NAMESPACE: ${{ vars.NAMESPACE }}
+      - name: Get Ingress URL
+        id: get-ingress-url
+        run: |
+          echo "APP_INGRESS_HOST=$(kubectl get ingress -n ${{ vars.NAMESPACE }} -o jsonpath='{.items[0].spec.tls[0].hosts[0]}')"
 
-  # Integration-Testing:
-  #   name: Integration Testing
-  #   needs: [deploy-stg-eks]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Test URL Output Using Curl and jq
-  #       run: |
-  #         echo $URL
-  #         echo "-------------------------------------------"
-  #         curl https://$URL/live | jq -r '.status' | grep -i live
+  Integration-Testing:
+    name: Integration Testing
+    needs: [deploy-stg-eks]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test URL Output Using Curl and jq
+        env:
+          URL: ${{ needs.deploy-stg-eks.outputs.URL }}
+        run: |
+          echo $URL
+          echo "-------------------------------------------"
+          curl https://$URL/live | jq -r '.status' | grep -i live
