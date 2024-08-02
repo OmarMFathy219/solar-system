@@ -182,7 +182,7 @@ jobs:
         run: | 
           kubectl version
 
-      - name: Replace Token in Managed Files
+      - name: Replace Token in Manifest Files
         uses: cschleiden/replace-tokens@v1.3
         with:
           tokenPrefix: '_{_'
