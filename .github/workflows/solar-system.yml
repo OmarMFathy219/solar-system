@@ -180,8 +180,8 @@ jobs:
       - name: Replace Token in Managed Files
         uses: cschleiden/replace-tokens@v1.3
         with:
-          tokenPrefix: '__{__'
-          tokenSuffix: '__}__'
+          tokenPrefix: '_{_'
+          tokenSuffix: '_}_'
           files: '["kubernetes/development/*.yaml"]'
         env:
           NAMESPACE: ${{ vars.NAMESPACE }}
