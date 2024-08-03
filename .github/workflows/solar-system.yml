@@ -226,7 +226,7 @@ jobs:
   deploy-prod-eks:
     name: Deploy to EKS Porduction Environment
     if: github.ref == 'refs/heads/main'
-    needs: [Dev-Integration-Testing]
+    needs: [Build-Image]
     environment:
       name: production
       url: https://prod.company.com
