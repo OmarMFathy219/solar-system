@@ -2,6 +2,30 @@ name: Deployment - Reusable Workflow
 
 on: 
   workflow_call:
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+        description: 'AWS Access Key ID for the account'
+
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+        description: 'AWS Secret Access Key for the account'
+
+      DOCKER_USERNAME:
+        required: true
+        description: 'Docker Username to push images'
+
+      KUBE_CONFIG:
+        required: true
+        description: 'Kube Config File for the cluster'
+
+      MONGO_USERNAME:
+        required: true
+        description: 'MongoDB Username for the database'
+
+      MONGO_PASSWORD:
+        required: true
+        description: 'MongoDB Password for the database'
 
 jobs:
   reuse-deploy:

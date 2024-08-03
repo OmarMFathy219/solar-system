@@ -145,7 +145,14 @@ jobs:
     if: contains(github.ref, 'feature/')
     needs: [Build-Image]
     uses: ./.github/workflows/reuse-deploy.yml
-
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
+      MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+    
   Dev-Integration-Testing:
     name: Development Integration Testing
     if: contains(github.ref, 'feature/')
@@ -165,6 +172,13 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [Build-Image]
     uses: ./.github/workflows/reuse-deploy.yml
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
+      MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
 
   Prod-Integration-Testing:
     name: Production Integration Testing
