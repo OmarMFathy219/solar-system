@@ -142,6 +142,7 @@ jobs:
     
   deploy-stg-eks:
     name: Deploy to EKS Staging Environment
+    if: contains(github.ref, 'feature/')
     needs: [Build-Image]
     environment:
       name: development
@@ -210,6 +211,7 @@ jobs:
 
   Dev-Integration-Testing:
     name: Development Integration Testing
+    if: contains(github.ref, 'feature/')
     needs: [deploy-stg-eks]
     runs-on: ubuntu-latest
     steps:
@@ -223,6 +225,7 @@ jobs:
 
   deploy-prod-eks:
     name: Deploy to EKS Porduction Environment
+    if: github.ref == 'refs/heads/main'
     needs: [Dev-Integration-Testing]
     environment:
       name: production
@@ -291,6 +294,7 @@ jobs:
 
   Prod-Integration-Testing:
     name: Production Integration Testing
+    if: github.ref == 'refs/heads/main'
     needs: [deploy-prod-eks]
     runs-on: ubuntu-latest
     steps:
