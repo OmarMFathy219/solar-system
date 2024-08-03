@@ -209,7 +209,7 @@ jobs:
           echo "APP_INGRESS_HOST=$(kubectl get ingress -n ${{ vars.NAMESPACE }} -o jsonpath='{.items[0].spec.tls[0].hosts[0]}')" >> $GITHUB_ENV
 
   Dev-Integration-Testing:
-    name: Integration Testing
+    name: Development Integration Testing
     needs: [deploy-stg-eks]
     runs-on: ubuntu-latest
     steps:
@@ -222,7 +222,7 @@ jobs:
         # curl https://$URL/live | jq -r '.status' | grep -i live
 
   deploy-prod-eks:
-    name: Deploy to EKS Staging Environment
+    name: Deploy to EKS Porduction Environment
     needs: [Dev-Integration-Testing]
     environment:
       name: production
@@ -290,7 +290,7 @@ jobs:
           echo "APP_INGRESS_HOST=$(kubectl get ingress -n ${{ vars.NAMESPACE }} -o jsonpath='{.items[0].spec.tls[0].hosts[0]}')" >> $GITHUB_ENV
 
   Prod-Integration-Testing:
-    name: Integration Testing
+    name: Production Integration Testing
     needs: [deploy-prod-eks]
     runs-on: ubuntu-latest
     steps:
