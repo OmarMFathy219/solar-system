@@ -7,7 +7,6 @@ on:
         description: 'AWS Default Region'
         required: true
         type: string
-        default: 'us-east-1'
 
       mongodb-uri:
         description: 'MongoDB URI for the database'
