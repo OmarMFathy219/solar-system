@@ -15,7 +15,7 @@ on:
       
       kubectl-version:
         description: 'Kubectl Version to use'
-        required: true
+        required: false
         type: string
         default: 'v1.30.0'
         
