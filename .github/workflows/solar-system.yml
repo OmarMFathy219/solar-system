@@ -152,6 +152,7 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
     with:
+        AWS_REGION: ${{ inputs.AWS_DEFAULT_REGION }}
         mongodb-uri: ${{ vars.MONGO_URI }}
         environment: development
     
@@ -182,6 +183,7 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
     with:
+        AWS_REGION: ${{ inputs.AWS_DEFAULT_REGION }}
         mongodb-uri: ${{ vars.MONGO_URI }}
         environment: production
 
