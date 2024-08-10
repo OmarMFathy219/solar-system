@@ -2,6 +2,41 @@ name: Deployment - Reusable Workflow
 
 on: 
   workflow_call:
+    inputs:
+      AWS_DEFAULT_REGION:
+        description: 'AWS Default Region'
+        required: true
+        type: string
+        default: 'us-east-1'
+
+      mongodb-uri:
+        description: 'MongoDB URI for the database'
+        required: true
+        type: string
+      
+      kubectl-version:
+        description: 'Kubectl Version to use'
+        required: true
+        type: string
+        default: 'v1.30.0'
+        
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'development'
+        type: string
+    
+  # workflow_dispatch:
+  #   inputs:  
+  #     environment:
+  #       description: 'Environment to deploy to'
+  #       required: true
+  #       default: 'development'
+  #       type: choice
+  #       options:
+  #         - development
+  #         - production
+
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
@@ -30,7 +65,7 @@ on:
 jobs:
   reuse-deploy:
     environment:
-      name: development
+      name: ${{ inputs.environment }}
       url: https://dev.company.com
     outputs:
       URL: ${{ steps.get-ingress-url.outputs.APP_INGRESS_HOST }}
@@ -42,14 +77,14 @@ jobs:
       - name: Install kubectl
         uses: azure/setup-kubectl@v4.0.0
         with:
-          version: 'v1.30.0'
+          version: ${{ inputs.kubectl-version }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+          aws-region: ${{ inputs.AWS_DEFAULT_REGION }}
 
       - name: Set Kubecfg File
         uses: azure/k8s-set-context@v4
@@ -70,7 +105,7 @@ jobs:
         with:
           tokenPrefix: '_{_'
           tokenSuffix: '_}_'
-          files: '["kubernetes/development/*.yaml"]'
+          files: '["kubernetes/${{ inputs.environment }}/*.yaml"]'
         env:
           NAMESPACE: ${{ vars.NAMESPACE }}
           REPLICAS: ${{ vars.REPLICAS }}
@@ -80,14 +115,14 @@ jobs:
       - name: Create MongoDB Secret
         run: |
           kubectl -n ${{ vars.NAMESPACE }} create secret generic mongo-db-creds \
-            --from-literal=MONGO_URI=${{ env.ENV_MONGO_URI }} \
+            --from-literal=MONGO_URI=${{ inputs.mongodb-uri }} \
             --from-literal=MONGO_USERNAME=${{ secrets.MONGO_USERNAME }} \
             --from-literal=MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }} \
             --save-config --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy to Dev Environment
         run: |
-          kubectl apply -f kubernetes/development
+          kubectl apply -f kubernetes/${{ inputs.environment }}/
 
       - name: Get Ingress URL
         id: get-ingress-url

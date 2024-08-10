@@ -9,7 +9,6 @@ on:
 
 env:
   AWS_DEFAULT_REGION: us-east-1
-  ENV_MONGO_URI: mongodb://localhost:27017
 
 jobs:
   unit-testing:
@@ -124,7 +123,7 @@ jobs:
         run: |
           docker run --name solar-system -d \
             -p 3000:3000 \
-            -e MONGO_URI=${{ env.ENV_MONGO_URI }} \
+            -e MONGO_URI=${{ inputs.MONGO_URI }} \
             -e MONGO_USERNAME=${{ secrets.MONGO_USERNAME }} \
             -e MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }} \
             ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
@@ -152,6 +151,9 @@ jobs:
       MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+    with:
+        mongodb-uri: ${{ vars.MONGO_URI }}
+        environment: development
     
   Dev-Integration-Testing:
     name: Development Integration Testing
@@ -179,6 +181,9 @@ jobs:
       MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+    with:
+        mongodb-uri: ${{ vars.MONGO_URI }}
+        environment: production
 
   Prod-Integration-Testing:
     name: Production Integration Testing
