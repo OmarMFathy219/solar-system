@@ -188,7 +188,7 @@ jobs:
     steps:
       - name: Test URL Output Using Curl and jq
         env:
-          URL: ${{ needs.deploy-prod-eks.outputs.URL }}
+          URL: ${{ needs.deploy-prod-eks.outputs.application-url }}
         run: |
           echo $URL
           echo "-------------------------------------------"

@@ -26,7 +26,12 @@ on:
       MONGO_PASSWORD:
         required: true
         description: 'MongoDB Password for the database'
-
+    
+    outputs:
+      application-url:
+        description: 'URL of the application'
+        value: ${{ jobs.reuse-deploy.outputs.URL }}
+  
 jobs:
   reuse-deploy:
     environment:
