@@ -88,7 +88,27 @@ jobs:
           name: Code-Coverage
           path: coverage
           retention-days: 3
-      
+   
+  Upload-Reports-to-S3:        
+   needs: [unit-testing, code-coverage]
+   runs-on: ubuntu-latest
+   continue-on-error: true
+   steps:
+      - name: Download Test Results and Code Coverage Report
+        uses: actions/download-artifact@v3
+        with:
+          name: |
+            Mocha-Test-Result
+            Code-Coverage
+            
+      - name: Merge Test Results and Code Coverage Report
+        run: |
+          mkdir -p Reports-$(date +"%Y-%m-%d")-${{ github.sha }}/
+          mv Mocha-Test-Result Reports-$(date +"%Y-%m-%d")-${{ github.sha }}/
+          mv Code-Coverage Reports-$(date +"%Y-%m-%d")-${{ github.sha }}/
+          ls Reports-$(date +"%Y-%m-%d")-${{ github.sha }}/
+        
+
   Build-Image:
     name: Build Docker Image and Push to Docker Hub & GitHub Container Registry
     permissions:
@@ -164,7 +184,7 @@ jobs:
     steps:
       - name: Test URL Output Using Curl and jq
         env:
-          URL: ${{ needs.deploy-stg-eks.outputs.URL }}
+          URL: ${{ needs.deploy-stg-eks.outputs.application-url }}
         run: |
           echo $URL
           echo "-------------------------------------------"
