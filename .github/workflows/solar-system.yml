@@ -94,12 +94,15 @@ jobs:
    runs-on: ubuntu-latest
    continue-on-error: true
    steps:
-      - name: Download Test Results and Code Coverage Report
+      - name: Download Test Results
         uses: actions/download-artifact@v3
         with:
-          name: |
-            Mocha-Test-Result
-            Code-Coverage
+          name: Mocha-Test-Result
+
+      - name: Download Code Coverage Report
+        uses: actions/download-artifact@v3
+        with:
+          name: Code-Coverage
             
       - name: Merge Test Results and Code Coverage Report
         run: |
